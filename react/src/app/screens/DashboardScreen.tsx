@@ -1,7 +1,8 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { DollarSign, TrendingUp, FileText, Package } from 'lucide-react';
 import { StatCard } from '../components/StatCard';
 import { DataTable } from '../components/DataTable';
+import { callApi } from '../services/callApi';
 
 const recentInvoices = [
   { id: 'INV-001', date: '2025-12-15', client: 'ABC Company', amount: '$1,250.00', status: 'Paid' },
@@ -41,6 +42,17 @@ const columns = [
 ];
 
 export const DashboardScreen: React.FC = () => {
+  const [clients, setClients] = useState([]);
+
+   useEffect(() => {
+    async function loadClients() {
+      const data = await callApi.getKlientet(); // <-- call preload bridge
+      setClients(data);
+    }
+    loadClients();
+
+  }, []);
+
   return (
     <div className="p-6">
       <div className="mb-6">
