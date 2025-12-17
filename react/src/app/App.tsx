@@ -8,7 +8,6 @@ import { ProductsScreen } from './screens/ProductsScreen';
 import { CreateInvoiceScreen } from './screens/CreateInvoiceScreen';
 import { InvoicePrintScreen } from './screens/InvoicePrintScreen';
 import { TransactionsScreen } from './screens/TransactionsScreen';
-import { ReportsScreen } from './screens/ReportsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 
 export default function App() {
@@ -33,8 +32,7 @@ export default function App() {
         return <InvoicePrintScreen />;
       case 'transactions':
         return <TransactionsScreen />;
-      case 'reports':
-        return <ReportsScreen />;
+    
       case 'settings':
         return <SettingsScreen />;
       default:

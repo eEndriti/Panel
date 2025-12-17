@@ -13,7 +13,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeScreen, onNavigate }) =>
     { id: 'products', icon: Package, label: 'Products' },
     { id: 'invoices', icon: FileText, label: 'Invoices' },
     { id: 'transactions', icon: DollarSign, label: 'Transactions' },
-    { id: 'reports', icon: BarChart3, label: 'Reports' },
     { id: 'settings', icon: Settings, label: 'Settings' },
   ];
 
