@@ -9,6 +9,10 @@ import { CreateInvoiceScreen } from './screens/CreateInvoiceScreen';
 import { InvoicePrintScreen } from './screens/InvoicePrintScreen';
 import { TransactionsScreen } from './screens/TransactionsScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { Toaster } from 'react-hot-toast';
+import './components/App.css'
+import { ConfirmDialogProvider } from './components/ConfirmDialogContext';
+
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -47,9 +51,12 @@ export default function App() {
         <TopBar 
           onNewInvoice={() => setActiveScreen('invoices')}
         />
-        <main className="flex-1 overflow-y-auto">
-          {renderScreen()}
-        </main>
+        <ConfirmDialogProvider>
+          <main className="flex-1 overflow-y-auto">
+            <Toaster position="top-right" />
+            {renderScreen()}
+          </main>
+        </ConfirmDialogProvider>
       </div>
     </div>
   );

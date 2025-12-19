@@ -44,14 +44,7 @@ const columns = [
 export const DashboardScreen: React.FC = () => {
   const [clients, setClients] = useState([]);
 
-   useEffect(() => {
-    async function loadClients() {
-      const data = await callApi.getKlientet(); // <-- call preload bridge
-      setClients(data);
-    }
-    loadClients();
-
-  }, []);
+ 
 
   return (
     <div className="p-6">

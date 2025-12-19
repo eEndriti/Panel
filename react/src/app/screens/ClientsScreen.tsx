@@ -1,75 +1,114 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { DataTable } from '../components/DataTable';
 import { Modal } from '../components/Modal';
-
-const mockClients = [
-  { id: 1, name: 'ABC Company', phone: '(555) 123-4567', email: 'contact@abccompany.com', address: '123 Main St, City', balance: '$1,250.00' },
-  { id: 2, name: 'XYZ Corp', phone: '(555) 234-5678', email: 'info@xyzcorp.com', address: '456 Oak Ave, Town', balance: '$0.00' },
-  { id: 3, name: 'Tech Solutions', phone: '(555) 345-6789', email: 'hello@techsolutions.com', address: '789 Pine Rd, Village', balance: '$890.00' },
-  { id: 4, name: 'Global Inc', phone: '(555) 456-7890', email: 'contact@globalinc.com', address: '321 Elm St, City', balance: '$0.00' },
-  { id: 5, name: 'Local Store', phone: '(555) 567-8901', email: 'info@localstore.com', address: '654 Maple Dr, Town', balance: '$450.00' },
-];
+import { callApi } from '../services/callApi';
+import {  notify } from '../components/toast';
+import { useConfirm } from '../components/ConfirmDialogContext.jsx';
+import {CircleLoader} from 'react-spinners'
 
 export const ClientsScreen: React.FC = () => {
-  const [clients, setClients] = useState(mockClients);
+  const [clients, setClients] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<any>(null);
   const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
+    emri: '',
+    nrTelefonit: '',
     email: '',
-    address: '',
+    adresa: '',
+    nrBiznesit:'',
+    nrFiskal:'',
+    nrTvsh:''
   });
+  const [loading, setLoading] = useState(true)
+  const confirm = useConfirm()
+
+    useEffect(() => {
+      loadClients();
+  }, []);
+
+
+  async function loadClients() {
+      try {
+        setLoading(true)
+        const data = await callApi.getKlientet(); 
+        setClients(data);
+      } catch (error) {
+        console.log('error fetching clients',error)
+      }finally{
+        setLoading(false)
+      }
+    }
 
   const handleAddClient = () => {
     setEditingClient(null);
-    setFormData({ name: '', phone: '', email: '', address: '' });
+    setFormData({ emri: '', nrTelefonit: '', email: '', adresa: '',nrBiznesit:'',nrFiskal:'',nrTvsh:'' });
     setIsModalOpen(true);
   };
 
   const handleEditClient = (client: any) => {
     setEditingClient(client);
     setFormData({
-      name: client.name,
-      phone: client.phone,
+      emri: client.emri,
+      nrTelefonit: client.nrTelefonit,
       email: client.email,
-      address: client.address,
+      adresa: client.adresa,
+      nrBiznesit:client.nrBiznesit,
+      nrFiskal:client.nrFiskal,
+      nrTvsh:client.nrTvsh
     });
     setIsModalOpen(true);
   };
 
-  const handleDeleteClient = (clientId: number) => {
-    setClients(clients.filter(c => c.id !== clientId));
+  const handleDeleteClient = async (clientId: number) => {
+
+    const confirmed = await confirm('A jeni i sigurt?')
+
+     if(confirmed){
+        try {
+          const result = await callApi.deleteKlient(clientId)
+          notify('Klienti u eliminua me sukses!','success')
+        } catch (error) {
+          notify('Gabim, ju lutem provoni serish !')
+        }finally{
+          loadClients()
+        }
+     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingClient) {
-      setClients(clients.map(c => 
-        c.id === editingClient.id 
-          ? { ...c, ...formData }
-          : c
-      ));
+       try {
+        const result = await callApi.updateKlient(editingClient.id ,formData)
+        notify('Klienti u ndryshua me sukses!','success')
+      } catch (error) {
+        notify('Gabim, ju lutem provoni serish !')
+      }finally{
+        loadClients()
+      }
     } else {
-      setClients([...clients, { 
-        id: clients.length + 1, 
-        ...formData, 
-        balance: '$0.00' 
-      }]);
+      try {
+        const result = await callApi.createKlient(formData)
+        notify('Klienti u ruajt me sukses!','success')
+      } catch (error) {
+        notify('Gabim, ju lutem provoni serish !')
+      }finally{
+        loadClients()
+      }
     }
     setIsModalOpen(false);
   };
 
   const columns = [
-    { key: 'name', header: 'Name', width: '180px' },
-    { key: 'phone', header: 'Phone', width: '140px' },
+    { key: 'emri', header: 'Emertimi', width: '180px' },
+    { key: 'nrTelefonit', header: 'Nr Telefonit', width: '140px' },
     { key: 'email', header: 'Email', width: 'auto' },
-    { key: 'address', header: 'Address', width: '200px' },
-    { key: 'balance', header: 'Balance', width: '120px' },
+    { key: 'adresa', header: 'Adresa', width: '200px' },
+    { key: 'detyrimet', header: 'Detyrimet', width: '120px' },
     {
       key: 'actions',
-      header: 'Actions',
+      header: 'Veprimet',
       width: '120px',
       render: (_: any, row: any) => (
         <div className="flex gap-2">
@@ -100,34 +139,43 @@ export const ClientsScreen: React.FC = () => {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">Clients</h2>
-          <p className="text-sm text-gray-600">Manage your client database</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-1">Klientet</h2>
+          <p className="text-sm text-gray-600">Menaxho Klientet</p>
         </div>
         <button
           onClick={handleAddClient}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           <Plus size={18} />
-          <span>Add Client</span>
+          <span>Shto Klientin</span>
         </button>
       </div>
 
-      <DataTable columns={columns} data={clients} />
+      {loading ? <div style={{ 
+                          display: 'flex', 
+                          justifyContent: 'center', 
+                          alignItems: 'center', 
+                          height: '70vh',
+                          width: '100%' 
+                      }}>
+                    <CircleLoader color='#1502ec' size={60} />
+                  </div>
+                :<DataTable columns={columns} data={clients} />}
 
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingClient ? 'Edit Client' : 'Add New Client'}
+        title={editingClient ? 'Ndrysho Klientin' : 'Shto nje Klient'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name *
+              Emertimi *
             </label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              value={formData.emri}
+              onChange={(e) => setFormData({ ...formData, emri: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
@@ -135,12 +183,12 @@ export const ClientsScreen: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone *
+              Nr Telefonit *
             </label>
             <input
               type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              value={formData.nrTelefonit}
+              onChange={(e) => setFormData({ ...formData, nrTelefonit: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
@@ -148,27 +196,57 @@ export const ClientsScreen: React.FC = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email *
+              Adresa
+            </label>
+            <textarea
+              value={formData.adresa}
+              onChange={(e) => setFormData({ ...formData, adresa: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
             </label>
             <input
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
+              
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
-            </label>
-            <textarea
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows={3}
-            />
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nr Biznesit </label>
+              <input
+                type="number"
+                value={formData.nrBiznesit}
+                onChange={(e) => setFormData({ ...formData, nrBiznesit: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nr Fiskal</label>
+              <input
+                type="number"
+                value={formData.nrFiskal}
+                onChange={(e) => setFormData({ ...formData, nrFiskal: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nr TVSH</label>
+              <input
+                type="number"
+                value={formData.nrTvsh}
+                onChange={(e) => setFormData({ ...formData, nrTvsh: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
           </div>
 
           <div className="flex gap-3 pt-4">
@@ -177,13 +255,13 @@ export const ClientsScreen: React.FC = () => {
               onClick={() => setIsModalOpen(false)}
               className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              Anulo
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
-              {editingClient ? 'Update' : 'Add'} Client
+              {editingClient ? 'Ndrysho' : 'Shto'} Klientin
             </button>
           </div>
         </form>

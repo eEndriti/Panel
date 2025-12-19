@@ -8,12 +8,12 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeScreen, onNavigate }) => {
   const menuItems = [
-    { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { id: 'clients', icon: Users, label: 'Clients' },
-    { id: 'products', icon: Package, label: 'Products' },
-    { id: 'invoices', icon: FileText, label: 'Invoices' },
-    { id: 'transactions', icon: DollarSign, label: 'Transactions' },
-    { id: 'settings', icon: Settings, label: 'Settings' },
+    { id: 'dashboard', icon: LayoutDashboard, label: 'Faqja Kryesore' },
+    { id: 'clients', icon: Users, label: 'Klientet' },
+    { id: 'products', icon: Package, label: 'Stoku' },
+    { id: 'invoices', icon: FileText, label: 'Faturat' },
+    { id: 'transactions', icon: DollarSign, label: 'Transaksionet' },
+    { id: 'settings', icon: Settings, label: 'Parametrat' },
   ];
 
   return (
@@ -22,7 +22,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeScreen, onNavigate }) =>
         <div className="w-10 h-10 bg-blue-600 rounded-md flex items-center justify-center mb-2">
           <span className="text-white font-semibold">BM</span>
         </div>
-        <h1 className="font-semibold text-gray-900">Business Manager</h1>
+        <h1 className="font-semibold text-gray-900">emri i app</h1>
       </div>
       
       <nav className="flex-1 p-3">
@@ -49,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeScreen, onNavigate }) =>
       <div className="p-3 border-t border-gray-200">
         <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
           <LogOut size={18} />
-          <span>Logout</span>
+          <span>Dil</span>
         </button>
       </div>
     </div>

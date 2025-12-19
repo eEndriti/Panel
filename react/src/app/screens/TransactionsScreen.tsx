@@ -52,7 +52,7 @@ export const TransactionsScreen: React.FC = () => {
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-1">Transactions</h2>
-        <p className="text-sm text-gray-600">View and manage all financial transactions</p>
+        <p className="text-sm text-gray-600">Qetu i kisha hek ndryshimet e kto e kisha bo me u dok veq faturat edhe i kisha shtu veprimet, nese klienti e klikon shfaq ne detaje, me ja qit ndryshimet edhe pagesat</p>
       </div>
 
       {/* Filters */}

@@ -64,7 +64,7 @@ async function getKlientet() {
 
 async function createKlient(data) {
     const pool = await getPool();
-    await pool.request()
+    const result = await pool.request() 
         .input('emri', sql.NVarChar, data.emri)
         .input('nrTelefonit', sql.NVarChar, data.nrTelefonit)
         .input('email', sql.NVarChar, data.email)
@@ -74,7 +74,10 @@ async function createKlient(data) {
         .input('nrFiskal', sql.NVarChar, data.nrFiskal)
         .query(`INSERT INTO Klientet 
                 (emri,nrTelefonit,email,adresa,nrBiznesit,nrTvsh,nrFiskal)
-                VALUES (@emri,@nrTelefonit,@email,@adresa,@nrBiznesit,@nrTvsh,@nrFiskal)`);
+                VALUES (@emri,@nrTelefonit,@email,@adresa,@nrBiznesit,@nrTvsh,@nrFiskal);
+                SELECT SCOPE_IDENTITY() AS id;`); 
+
+    return result.recordset[0]; 
 }
 
 async function updateKlient(id, data) {

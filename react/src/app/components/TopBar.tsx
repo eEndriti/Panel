@@ -8,7 +8,7 @@ interface TopBarProps {
 }
 
 export const TopBar: React.FC<TopBarProps> = ({ 
-  userName = 'John Doe',
+  userName = 'emri userit',
   onNewInvoice 
 }) => {
   const currentDate = new Date().toLocaleDateString('al-AL', {
@@ -31,14 +31,14 @@ export const TopBar: React.FC<TopBarProps> = ({
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus size={18} />
-            <span>New Invoice</span>
+            <span> Fature e re</span>
           </button>
         )}
         
         <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
           <div className="text-right">
             <p className="text-sm font-medium text-gray-900">{userName}</p>
-            <p className="text-xs text-gray-500">Administrator</p>
+            <p className="text-xs text-gray-500">roli</p>
           </div>
           <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
             <span className="text-sm font-semibold text-blue-600">
