@@ -199,7 +199,7 @@ async function deleteFature(id) {
 // ---- Transaksionet ----
 async function getTransaksionet() {
     const pool = await getPool();
-    const result = await pool.request().query('SELECT * FROM Transaksionet');
+    const result = await pool.request().query(`select t.* , k.id as 'klientiId',k.emri ,k.nrTelefonit,k.email,k.adresa,k.nrBiznesit,k.nrTvsh,k.nrFiskal from Transaksionet t join Klientet k on t.klientId = k.id`);
     return result.recordset;
 }
 

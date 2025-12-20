@@ -11,7 +11,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeScreen, onNavigate }) =>
     { id: 'dashboard', icon: LayoutDashboard, label: 'Faqja Kryesore' },
     { id: 'clients', icon: Users, label: 'Klientet' },
     { id: 'products', icon: Package, label: 'Stoku' },
-    { id: 'invoices', icon: FileText, label: 'Faturat' },
     { id: 'transactions', icon: DollarSign, label: 'Transaksionet' },
     { id: 'settings', icon: Settings, label: 'Parametrat' },
   ];

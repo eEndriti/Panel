@@ -35,7 +35,7 @@ export const DataTable: React.FC<DataTableProps> = ({ columns, data, onRowClick 
             {data.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="px-4 py-8 text-center text-gray-500">
-                  No data available
+                  Nuk ka te Dhena !
                 </td>
               </tr>
             ) : (
