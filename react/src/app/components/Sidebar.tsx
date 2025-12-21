@@ -18,10 +18,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeScreen, onNavigate }) =>
   return (
     <div className="w-[220px] bg-white border-r border-gray-200 flex flex-col h-screen">
       <div className="p-6 border-b border-gray-200">
-        <div className="w-10 h-10 bg-blue-600 rounded-md flex items-center justify-center mb-2">
-          <span className="text-white font-semibold">BM</span>
+        <div className="w-25 h-10 bg-gray-400 rounded-md flex items-center justify-center mb-2">
+          <span className="text-white font-semibold">PANELI</span>
         </div>
-        <h1 className="font-semibold text-gray-900">emri i app</h1>
       </div>
       
       <nav className="flex-1 p-3">

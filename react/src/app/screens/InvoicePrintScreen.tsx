@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { callApi } from '../services/callApi';
+import Loader from './Loader';
 
 export const InvoicePrintScreen: React.FC = () => {
+
   const invoiceData = {
     number: 'INV-001234',
     date: 'December 16, 2025',
@@ -32,7 +35,7 @@ export const InvoicePrintScreen: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="max-w-4xl mx-auto">
+       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-md border border-gray-200 shadow-sm">
           {/* A4 Print Layout */}
           <div className="p-12" style={{ minHeight: '297mm', width: '210mm' }}>

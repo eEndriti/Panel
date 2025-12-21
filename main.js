@@ -1,6 +1,8 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain,shell } = require('electron');
 const path = require('path');
 const db = require('./database.js');
+const fs = require("fs");
+
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -19,6 +21,10 @@ function createWindow() {
 app.whenReady().then(createWindow);
 
 // ====== IPC Handlers ======
+ipcMain.on('savePDF', (event, { pdfBase64, folderPath, fileName }) => { const filePath = path.join(folderPath, fileName); const buffer = Buffer.from(pdfBase64, 'base64'); fs.writeFile(filePath, buffer, (error) => { if (error) { console.error('Failed to save PDF:', error); } else { console.log('PDF saved successfully to', filePath); } }); });
+
+ipcMain.on('openFile', (event, filePath) => { shell.openPath(filePath) .then(() => console.log('File opened successfully')) .catch((error) => console.error('Failed to open file:', error)); });
+
 
 // Perdoruesit
 ipcMain.handle('get-perdoruesit', async () => await db.getPerdoruesit());
@@ -43,6 +49,8 @@ ipcMain.handle('get-faturat', async () => await db.getFaturat());
 ipcMain.handle('create-fature', async (event, data) => await db.createFature(data));
 ipcMain.handle('update-fature', async (event, id, data) => await db.updateFature(id, data));
 ipcMain.handle('delete-fature', async (event, id) => await db.deleteFature(id));
+ipcMain.handle('getNrPaPaguar', async () => await db.getNrPaPaguar());
+ipcMain.handle('getInvoiceNr', async () => await db.getInvoiceNr());
 
 // Transaksionet
 ipcMain.handle('get-transaksionet', async () => await db.getTransaksionet());

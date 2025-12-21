@@ -1,10 +1,11 @@
 const sql = require('mssql');
+const bcrypt = require('bcrypt');
 
 // ====== MSSQL Config ======
 const config = {
     user: 'user1',
     password: '12345',
-    server: 'DESKTOP-HQS13OS',      // or your server
+    server: 'DESKTOP-RJASQGG',      // or your server
     database: 'paneli',   // name of your DB
     options: {
         encrypt: false,       // true if using Azure
@@ -16,6 +17,25 @@ const config = {
 async function getPool() {
     const pool = await sql.connect(config);
     return pool;
+}
+
+
+async function hashData(plainTextPassword) {
+  try {
+    const saltRounds = 10;
+
+    // Generate the salt
+    const salt = await bcrypt.genSalt(saltRounds);
+    
+    // Generate the hash using the salt
+    const hash = await bcrypt.hash(plainTextPassword, salt);
+    
+    // Return both the salt and hash
+    return { success: true, salt, hash };
+  } catch (error) {
+    console.error('Error generating hash and salt:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 // =========================
@@ -41,11 +61,14 @@ async function createPerdoruesit(data) {
 
 async function updatePerdoruesit(id, data) {
     const pool = await getPool();
+    const hashResult = await hashData(data.fjalekalimi)
+    console.log('hash',hashResult)
     await pool.request()
         .input('id', sql.Int, id)
         .input('emri', sql.NVarChar, data.emri)
-        .input('roli', sql.NVarChar, data.roli)
-        .query('UPDATE Perdoruesit SET emri=@emri, roli=@roli WHERE id=@id');
+        .input('fjalekalimiHash', sql.NVarChar, hashResult.hash)
+        .input('salt', sql.NVarChar, hashResult.salt)
+        .query('UPDATE Perdoruesit SET emri=@emri, fjalekalimiHash=@fjalekalimiHash , salt = @salt WHERE id=@id');
 }
 
 async function deletePerdoruesit(id) {
@@ -305,6 +328,14 @@ async function deleteParametar(id) {
         .query('DELETE FROM Parametrat WHERE id=@id');
 }
 
+
+async function getInvoiceNr() {
+    const pool = await getPool();
+    const result = await pool.request().query('SELECT lastNr + 1 AS nextNr FROM InvoiceCounter;');
+    return result.recordset;
+}
+
+
 // ===== Export all functions =====
 module.exports = {
     // Perdoruesit
@@ -314,7 +345,7 @@ module.exports = {
     // Produktet
     getProduktet, createProdukt, updateProdukt, deleteProdukt,
     // Faturat
-    getFaturat, createFature, updateFature, deleteFature,getNrPaPaguar,
+    getFaturat, createFature, updateFature, deleteFature,getNrPaPaguar,getInvoiceNr,
     // Transaksionet
     getTransaksionet, createTransaksion, updateTransaksion, deleteTransaksion,
     // Kompania
