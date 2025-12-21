@@ -4,7 +4,7 @@ const sql = require('mssql');
 const config = {
     user: 'user1',
     password: '12345',
-    server: 'DESKTOP-RJASQGG',      // or your server
+    server: 'DESKTOP-HQS13OS',      // or your server
     database: 'paneli',   // name of your DB
     options: {
         encrypt: false,       // true if using Azure
@@ -157,6 +157,13 @@ async function getFaturat() {
     return result.recordset;
 }
 
+async function getNrPaPaguar() {
+    const pool = await getPool();
+    const result = await pool.request().query('select Count(*) from Faturat f where f.mbetja > 0');
+    return result.recordset;
+}
+
+
 async function createFature(data) {
     const pool = await getPool();
     await pool.request()
@@ -307,7 +314,7 @@ module.exports = {
     // Produktet
     getProduktet, createProdukt, updateProdukt, deleteProdukt,
     // Faturat
-    getFaturat, createFature, updateFature, deleteFature,
+    getFaturat, createFature, updateFature, deleteFature,getNrPaPaguar,
     // Transaksionet
     getTransaksionet, createTransaksion, updateTransaksion, deleteTransaksion,
     // Kompania

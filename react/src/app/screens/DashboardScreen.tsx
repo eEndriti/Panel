@@ -1,49 +1,126 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, TrendingUp, FileText, Package } from 'lucide-react';
+import { DollarSign, TrendingUp, FileText, Package, Pencil, Trash2 } from 'lucide-react';
 import { StatCard } from '../components/StatCard';
 import { DataTable } from '../components/DataTable';
 import { callApi } from '../services/callApi';
+import Loader from './Loader';
 
-const recentInvoices = [
-  { id: 'INV-001', date: '2025-12-15', client: 'ABC Company', amount: '$1,250.00', status: 'Paid' },
-  { id: 'INV-002', date: '2025-12-14', client: 'XYZ Corp', amount: '$3,500.00', status: 'Paid' },
-  { id: 'INV-003', date: '2025-12-14', client: 'Tech Solutions', amount: '$890.00', status: 'Pending' },
-  { id: 'INV-004', date: '2025-12-13', client: 'Global Inc', amount: '$2,100.00', status: 'Paid' },
-  { id: 'INV-005', date: '2025-12-13', client: 'Local Store', amount: '$450.00', status: 'Pending' },
-  { id: 'INV-006', date: '2025-12-12', client: 'Design Studio', amount: '$1,800.00', status: 'Paid' },
-  { id: 'INV-007', date: '2025-12-12', client: 'Marketing Plus', amount: '$675.00', status: 'Overdue' },
-  { id: 'INV-008', date: '2025-12-11', client: 'Development Co', amount: '$4,200.00', status: 'Paid' },
-  { id: 'INV-009', date: '2025-12-11', client: 'Retail Chain', amount: '$920.00', status: 'Pending' },
-  { id: 'INV-010', date: '2025-12-10', client: 'Consulting Firm', amount: '$3,100.00', status: 'Paid' },
-];
 
 const columns = [
-  { key: 'id', header: 'Invoice #', width: '120px' },
-  { key: 'date', header: 'Date', width: '120px' },
-  { key: 'client', header: 'Client', width: 'auto' },
-  { key: 'amount', header: 'Amount', width: '120px' },
-  {
-    key: 'status',
-    header: 'Status',
-    width: '120px',
-    render: (status: string) => {
-      const colors = {
-        Paid: 'bg-green-50 text-green-700',
-        Pending: 'bg-yellow-50 text-yellow-700',
-        Overdue: 'bg-red-50 text-red-700'
-      };
-      return (
-        <span className={`inline-block px-2.5 py-1 rounded text-xs font-medium ${colors[status as keyof typeof colors]}`}>
-          {status}
-        </span>
-      );
-    }
-  }
+  { key: 'id', header: 'Nr #', width: 'auto' },
+  { 
+    key: 'data', 
+    header: 'Data Fatures', 
+    width: 'auto',
+    render: (value: string) => formatToAlbanianDate(value)
+  },
+  { key: 'nrFatures', header: 'Nr i Fatures', width: 'auto' },
+  { key: 'totaliPerPagese', header: 'Totali Per Pagese', width: 'auto' },
+  { 
+      key: 'mbetja', 
+      header: 'Mbetja Per Pagese', 
+      width: 'auto',
+      render: (value: any) => {
+        // Convert to number to ensure the comparison works correctly
+        const amount = Number(value);
+
+        if (amount > 0) {
+          return (
+            <span className="inline-block px-2.5 py-1 rounded text-xs font-semibold bg-red-100 text-red-700">
+              {amount.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €
+            </span>
+          );
+        }
+
+        return (
+          <span className="inline-block px-2.5 py-1 rounded text-xs font-semibold bg-green-100 text-green-700">
+            0.00 €
+          </span>
+        );
+      }
+    },
+    {
+      key: 'actions',
+      header: 'Veprimet',
+      width: '120px',
+      render: (_: any, row: any) => (
+        <div className="flex gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEditTransaction(row);
+            }}
+            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+          >
+            <Pencil size={16} />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteTransaction(row.id);
+            }}
+            className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      ),
+    },
+  
+];
+const ALBANIAN_MONTHS = [
+  'Janar', 'Shkurt', 'Mars', 'Prill', 'Maj', 'Qershor',
+  'Korrik', 'Gusht', 'Shtator', 'Tetor', 'Nëntor', 'Dhjetor'
 ];
 
-export const DashboardScreen: React.FC = () => {
-  const [clients, setClients] = useState([]);
+const formatToAlbanianDate = (dateString: string) => {
+  if (!dateString) return '-';
+  
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
 
+  const day = date.getDate();
+  const month = ALBANIAN_MONTHS[date.getMonth()];
+  const year = date.getFullYear();
+
+  return `${day} ${month} ${year}`;
+};
+
+  const handleDeleteTransaction = async (transaksionId: number) => {
+    const confirmed = await confirm('A jeni i sigurt?')
+    
+       
+  };
+
+  const handleEditTransaction = (product: any) => {
+    alert('Hala su bo')
+   
+  };
+
+export const DashboardScreen: React.FC = () => {
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [nrPaPaguar, setNrPaPaguar] = useState(0);
+
+  useEffect(() => {
+    loadData()
+  }, []);
+
+  async function loadData() {
+    console.log('vv')
+    try {
+      const result  = await callApi.getFaturat()
+      const getNr = await callApi.getNrPaPaguar()
+      setNrPaPaguar(getNr[0][''])
+      console.log('nr pa paguar',getNr)
+      console.log(result)
+      setInvoices(result)
+    } catch (error) {
+      console.log('error',error)
+    }finally{
+      setLoading(false)
+    }
+  }
  
 
   return (
@@ -53,7 +130,7 @@ export const DashboardScreen: React.FC = () => {
         <p className="text-sm text-gray-600">Overview of your business metrics</p>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-3 mb-6">
         <StatCard
           title="Today's Sales"
           value="$2,340"
@@ -74,17 +151,12 @@ export const DashboardScreen: React.FC = () => {
           icon={FileText}
           iconColor="bg-yellow-50 text-yellow-600"
         />
-        <StatCard
-          title="Low Stock Items"
-          value="7"
-          icon={Package}
-          iconColor="bg-red-50 text-red-600"
-        />
+        
       </div>
 
       <div className="bg-white rounded-md border border-gray-200 p-5">
-        <h3 className="font-semibold text-gray-900 mb-4">Recent Invoices</h3>
-        <DataTable columns={columns} data={recentInvoices} />
+        <h3 className="font-semibold text-gray-900 mb-4">Faturat e Fundit</h3>
+        {loading ? <Loader /> :<DataTable columns={columns} data={invoices.toReversed()} />}
       </div>
     </div>
   );

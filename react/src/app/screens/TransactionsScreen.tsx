@@ -162,7 +162,7 @@ const formatToAlbanianDate = (dateString: string) => {
           >
             <Pencil size={16} />
           </button>
-          <button
+          {row.lloji !== 'Ndryshim' && <button disabled = {row.lloji  == 'Ndryshim'}
             onClick={(e) => {
               e.stopPropagation();
               handleDeleteTransaction(row.id);
@@ -170,7 +170,7 @@ const formatToAlbanianDate = (dateString: string) => {
             className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
           >
             <Trash2 size={16} />
-          </button>
+          </button>}
         </div>
       ),
     },
