@@ -20,27 +20,30 @@ export default function InvoiceProductsTable({ products, onChange }) {
     }
   }, [rows]);
 
-  const addRow = () => {
-    setRows([
-      ...rows,
-      {
-        selectedProduct: null,
-        sasia: 1,
-        cmimiShitjes: 0,
-        Tvsh: 0,
-        totaliProduktit: 0,
-        stock: 0,
-        pershkrimi: "",
-        emertimi: "",
-      },
-    ]);
-  };
+const addRow = () => {
+  setRows([
+    ...rows,
+    {
+      Nr: rows.length + 1, // row number
+      selectedProduct: null,
+      sasia: 1,
+      cmimiShitjes: 0,
+      Tvsh: 0,
+      totaliProduktit: 0,
+      stock: 0,
+      pershkrimi: "",
+      emertimi: "",
+    },
+  ]);
+};
 
-  const removeRow = (index) => {
-    const updated = [...rows];
-    updated.splice(index, 1);
-    setRows(updated);
-  };
+const removeRow = (index) => {
+  const updated = [...rows];
+  updated.splice(index, 1);
+  // Recalculate row numbers
+  updated.forEach((row, i) => (row.Nr = i + 1));
+  setRows(updated);
+};
 
   const handleProductSelect = (index, selected) => {
     const updated = [...rows];
@@ -51,6 +54,7 @@ export default function InvoiceProductsTable({ products, onChange }) {
     updated[index].Tvsh = selected.Tvsh;
     updated[index].stock = selected.sasia;
     updated[index].sasia = 1;
+    updated[index].njesia = selected.njesia;
     updated[index].totaliProduktit = 1 * updated[index].cmimiShitjes;
     setRows(updated);
   };
@@ -72,6 +76,7 @@ export default function InvoiceProductsTable({ products, onChange }) {
       <table className="min-w-full border border-gray-200 text-sm">
         <thead className="bg-gray-50">
           <tr>
+            <th className="border px-3 py-2">Nr</th>
             <th className="border px-3 py-2">Produkt</th>
             <th className="border px-3 py-2">Pershkrimi</th>
             <th className="border px-3 py-2">Stoqet</th>
@@ -85,6 +90,7 @@ export default function InvoiceProductsTable({ products, onChange }) {
         <tbody>
           {rows.map((row, index) => (
             <tr key={index}>
+              <td className="border px-2 py-1 text-center">{index + 1}</td> 
               <td className="border px-2 py-1">
                 <Select
                   options={products.map((p) => ({
@@ -103,44 +109,24 @@ export default function InvoiceProductsTable({ products, onChange }) {
                   className="text-sm"
                 />
               </td>
-              <td className="border px-2 py-1">{row.pershkrimi}</td>
-              <td className="border px-2 py-1 text-center">{row.stock}</td>
-              <td className="border px-2 py-1">
-                <input
-                  type="number"
-                  min="1"
-                  value={row.sasia}
-                  onChange={(e) =>
-                    handleFieldChange(index, "sasia", e.target.value)
-                  }
-                  className="w-full px-2 py-1 border rounded text-sm"
-                />
+              <td className="border px-2 py-1">{row.pershkrimi}</td> 
+              <td className="border px-2 py-1 text-center">{row.stock}</td> 
+              <td className="border px-2 py-1"> 
+                <input type="number" min="1" value={row.sasia} onChange={(e) => handleFieldChange(index, "sasia", e.target.value) } className="w-full px-2 py-1 border rounded text-sm" /> 
+              </td> 
+              <td className="border px-2 py-1"> 
+                <input type="number" min="0" value={row.cmimiShitjes} onChange={(e) => handleFieldChange(index, "cmimiShitjes", e.target.value) } className="w-full px-2 py-1 border rounded text-sm" /> 
+              </td> 
+              <td className="border px-2 py-1 text-right">{row.Tvsh}</td> 
+              <td className="border px-2 py-1 text-right">{row.totaliProduktit?.toFixed(2)}</td> 
+              <td className="border px-2 py-1 text-center"> 
+                <button type="button" onClick={() => removeRow(index)} className="text-red-500 hover:text-red-700 font-semibold" > Fshij </button> 
               </td>
-              <td className="border px-2 py-1">
-                <input
-                  type="number"
-                  min="0"
-                  value={row.cmimiShitjes}
-                  onChange={(e) =>
-                    handleFieldChange(index, "cmimiShitjes", e.target.value)
-                  }
-                  className="w-full px-2 py-1 border rounded text-sm"
-                />
-              </td>
-              <td className="border px-2 py-1 text-right">{row.Tvsh}</td>
-              <td className="border px-2 py-1 text-right">{row.totaliProduktit?.toFixed(2)}</td>
-              <td className="border px-2 py-1 text-center">
-                <button
-                  type="button"
-                  onClick={() => removeRow(index)}
-                  className="text-red-500 hover:text-red-700 font-semibold"
-                >
-                  Fshij
-                </button>
-              </td>
+              {/* rest of your columns */}
             </tr>
           ))}
         </tbody>
+
       </table>
 
       <div className="mt-4 flex justify-between items-center">

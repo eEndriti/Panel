@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-
-export default function InvoiceActions({invoiceData,onCancel,onRegister,disabledButton}) {
+import {ClipLoader} from 'react-spinners'
+export default function InvoiceActions({invoiceData,onCancel,onRegister,disabledButton,loadingSaveBtn}) {
   const [totaliPaguar, setTotaliPaguar] = useState(0);
 
   const mbetjaPerPagese = Math.max(invoiceData.total - totaliPaguar, 0);
@@ -17,15 +17,15 @@ export default function InvoiceActions({invoiceData,onCancel,onRegister,disabled
           Anulo
         </button>
         <button
-            disabled={disabledButton}
+            disabled={disabledButton || loadingSaveBtn}
             onClick={() => onRegister(totaliPaguar)}
             className={`flex-1 px-6 py-3 rounded-md text-lg font-semibold transition-colors
-                ${disabledButton 
+                ${disabledButton || loadingSaveBtn
                 ? "bg-green-300 text-white cursor-not-allowed" 
                 : "bg-green-600 text-white hover:bg-green-700"
                 }`}
             >
-            Regjistro
+             {loadingSaveBtn ? <div><ClipLoader size ={16} />Duke Ruajtur</div> : ' Regjistro'}
             </button>
       </div>
 

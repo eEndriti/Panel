@@ -32,8 +32,7 @@ export default function App() {
         return <ProductsScreen />;
       case 'invoices':
         return <CreateInvoiceScreen />;
-      case 'invoice-print':
-        return <InvoicePrintScreen />;
+      
       case 'transactions':
         return <TransactionsScreen />;
     

@@ -5,6 +5,7 @@ import Select from "react-select";
 import InvoiceProductsTable from './InvoiceProductsTable';
 import InvoiceActions from './InvoiceActions';
 import { InvoicePrint } from './InvoicePrint';
+import {  notify } from '../components/toast';
 
 
 interface Client { id: string; emri: string; }
@@ -13,8 +14,6 @@ interface Client { id: string; emri: string; }
 export const CreateInvoiceScreen: React.FC = () => {
   const [selectedClient, setSelectedClient] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
-  const [discount, setDiscount] = useState(0);
-  const taxRate = 10; // 10% tax
   const [kompaniaFetched, setKompaniaFetched] = useState([])
   const [klientet, setKlientet] = useState<Client[]>([]);
   const [loading, setLoading] = useState(false)
@@ -25,6 +24,8 @@ export const CreateInvoiceScreen: React.FC = () => {
     total: 0,
     totalTVSH: 0,
   });
+  const [komenti, setKomenti] = useState('')
+  const [loadingSaveBtn, setLoadingSaveBtn] = useState(false)
   
     useEffect(()=>{
       loadData()
@@ -59,11 +60,48 @@ export const CreateInvoiceScreen: React.FC = () => {
   };
 
 
-  function saveInvoice() {
-    let komenti = 'per koment'
-    let klienti = klientet.find(k => k.id == selectedClient)
-    InvoicePrint(klienti,nrFatures,invoiceDate,komenti,invoiceData) // klient data,nr fatures,data fatures,komenti,produktet,totalet
+  const  saveInvoice = async (totaliPaguar) => {
+     let klienti = klientet.find(k => k.id == selectedClient)
+    //nrFatures,klientId,data,komenti,totaliPerPagese,TotaliPaguar,mbetja, isDeleted = false
+    //produktet, idFatura,idProdukt,sasia,cmimiPerCop,
+    //lloji = Fature , referenca (nrFatures),klientiId,totaliPerPagse,totaliPaguar,mbetja,data
+    //invoiceCounter ++1
+   const totaliPerPagese = Number(invoiceData.total) || 0;
+    const totaliPaguarFinal = Number(totaliPaguar) || 0;
+    const mbetjaPerPagese = Math.max(
+      totaliPerPagese - totaliPaguarFinal,
+      0
+    );
+    
+    const dataPerFature = {
+      nrFatures,
+      klientId: klienti?.id ?? '',
+      data: new Date().toISOString().split('T')[0],
+      komenti,
+      invoiceData,
+      lloji: 'Fature',
+      isDeleted: false,
+      totaliPerPagese,
+      totaliPaguar: totaliPaguarFinal,
+      mbetjaPerPagese
+    };
+console.log(dataPerFature)
+    try {
+      setLoadingSaveBtn(true)
+      //const result = await callApi.createFature(dataPerFature)
+       notify('Fatura u Regjistrua me Sukses!','success')
+
+    } catch (error) {
+       notify('Gabim gjate Regjistrimit!','error')
+    }finally{
+      setLoadingSaveBtn(false)
+    }
+
+    InvoicePrint(klienti,nrFatures,formattedDate,komenti,invoiceData,kompaniaFetched[0]) // klient data,nr fatures,data fatures,komenti,produktet,totalet
   }
+
+  const formattedDate = invoiceDate.split('-').reverse().join('-');
+
   return (
     <div className="p-6">
       <div className="grid grid-cols-1 gap-6">
@@ -73,7 +111,7 @@ export const CreateInvoiceScreen: React.FC = () => {
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 mb-5">Informatat e Fatures</h3>
 
-            <div className="grid grid-cols-3 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-4 md:grid-cols-4 gap-5">
               {/* Klienti */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -115,6 +153,18 @@ export const CreateInvoiceScreen: React.FC = () => {
                   required
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Komenti
+                </label>
+                <textarea
+                  value={komenti}
+                  onChange={(e) => setKomenti(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                />
+              </div>
               
               { /*<div className="w-75">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -141,8 +191,8 @@ export const CreateInvoiceScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column - Summary */}
-        <InvoiceActions invoiceData = {invoiceData} onCancel = {() => ''} onRegister ={() => saveInvoice()} disabledButton = {invoiceData?.rows?.length < 1 || !selectedClient} />
+        {/* Bottom Column - Actions */}
+        <InvoiceActions invoiceData = {invoiceData} onCancel = {() => ''} onRegister ={saveInvoice} disabledButton = {invoiceData?.rows?.length < 1 || !selectedClient} loadingSaveBtn = {loadingSaveBtn}/>
 
       </div>
     </div>

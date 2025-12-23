@@ -187,19 +187,83 @@ async function getNrPaPaguar() {
 }
 
 
-async function createFature(data) {
-    const pool = await getPool();
-    await pool.request()
-        .input('nrFatures', sql.NVarChar, data.nrFatures)
-        .input('klientId', sql.Int, data.klientId)
-        .input('data', sql.DateTime, data.data)
-        .input('komenti', sql.NVarChar, data.komenti)
-        .input('totaliPerPagese', sql.Decimal(18,2), data.totaliPerPagese)
-        .input('totaliPageses', sql.Decimal(18,2), data.totaliPageses)
-        .input('mbetja', sql.Decimal(18,2), data.mbetja)
-        .query(`INSERT INTO Faturat 
-                (nrFatures,klientId,data,komenti,totaliPerPagese,totaliPageses,mbetja)
-                VALUES (@nrFatures,@klientId,@data,@komenti,@totaliPerPagese,@totaliPageses,@mbetja)`);
+ async function createFature(data) {
+  const pool = await getPool();
+  const transaction = new sql.Transaction(pool);
+
+  try {
+    await transaction.begin();
+
+    // 1️⃣ Insert into Faturat and get the inserted ID
+    const faturaResult = await new sql.Request(transaction)
+      .input('nrFatures', sql.NVarChar, data.nrFatures)
+      .input('klientId', sql.Int, data.klientId)
+      .input('data', sql.DateTime, data.data)
+      .input('komenti', sql.NVarChar, data.komenti)
+      .input('totaliPerPagese', sql.Decimal(18, 2), data.totaliPerPagese)
+      .input('totaliPageses', sql.Decimal(18, 2), data.totaliPaguar)
+      .input('mbetja', sql.Decimal(18, 2), data.mbetjaPerPagese)
+      .query(`
+        INSERT INTO Faturat
+        (nrFatures, klientId, data, komenti, totaliPerPagese, totaliPageses, mbetja)
+        OUTPUT INSERTED.id
+        VALUES
+        (@nrFatures, @klientId, @data, @komenti, @totaliPerPagese, @totaliPageses, @mbetja)
+      `);
+
+    const insertedFaturaId = faturaResult.recordset[0].id;
+
+    // 2️⃣ Insert all products
+    for (const row of data.invoiceData.rows) {
+      await new sql.Request(transaction)
+        .input('idFature', sql.Int, insertedFaturaId)
+        .input('idProdukt', sql.Int, row.selectedProduct.id)
+        .input('sasia', sql.Int, row.sasia)
+        .input('cmimiPerCop', sql.Decimal(18, 2), row.cmimiShitjes)
+        .query(`
+          INSERT INTO FaturaProduktet
+          (idFature, idProdukt, sasia, cmimiPerCop)
+          VALUES
+          (@idFature, @idProdukt, @sasia, @cmimiPerCop)
+        `);
+    }
+
+    await new sql.Request(transaction)
+      .input('lloji', sql.NVarChar, data.lloji)
+      .input('referenca', sql.NVarChar, data.nrFatures)
+      .input('klientId', sql.Int, data.klientId)
+      .input('data', sql.DateTime, data.data)
+      .input('totaliPerPagese', sql.Decimal(18, 2), data.totaliPerPagese)
+      .input('totaliPaguar', sql.Decimal(18, 2), data.totaliPaguar)
+      .input('mbetjaPerPagese', sql.Decimal(18, 2), data.mbetjaPerPagese)
+      .query(`
+        INSERT INTO Transaksionet
+        (lloji, referenca, klientId, data, totaliPerPagese, totaliPaguar, mbetjaPerPagese)
+        VALUES
+        (@lloji, @referenca, @klientId, @data, @totaliPerPagese, @totaliPaguar, @mbetjaPerPagese)
+      `);
+
+    // 4️⃣ Update invoiceCounter table
+    // Remove first letter from nrFatures (F001 -> 001)
+    const lastNr = data.nrFatures.slice(1);
+    await new sql.Request(transaction)
+      .input('lastNr', sql.NVarChar, lastNr)
+      .query(`
+        UPDATE invoiceCounter
+        SET lastNr = @lastNr
+      `);
+
+    // ✅ Commit transaction
+    await transaction.commit();
+
+    return { success: true, insertedFaturaId };
+
+  } catch (error) {
+    // ❌ Rollback on error
+    await transaction.rollback();
+    console.error('Error creating fature:', error);
+    return { success: false, error };
+  }
 }
 
 async function updateFature(id, data) {

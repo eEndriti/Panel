@@ -11,12 +11,25 @@ export const TopBar: React.FC<TopBarProps> = ({
   userName = 'emri userit',
   onNewInvoice 
 }) => {
-  const currentDate = new Date().toLocaleDateString('al-AL', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+const daysSq = [
+  'e Diel',
+  'e Hënë',
+  'e Martë',
+  'e Mërkurë',
+  'e Enjte',
+  'e Premte',
+  'e Shtunë'
+];
+
+const date = new Date();
+
+const dayName = daysSq[date.getDay()];
+const day = date.getDate();
+const year = date.getFullYear();
+
+const month = date.toLocaleDateString('en-US', { month: 'long' });
+
+const currentDate = `${dayName}, ${day} ${month} ${year}`;
 
   return (
     <div className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6">
