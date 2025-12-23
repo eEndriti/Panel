@@ -18,7 +18,6 @@ export const ProductsScreen: React.FC = () => {
     pershkrimi: '',
     shifra: '',
     njesia: '',
-    Tvsh:'',
     sasia:'',
     cmimiShitjes:''
   });
@@ -44,7 +43,7 @@ export const ProductsScreen: React.FC = () => {
 
   const handleAddProduct = () => {
     setEditingProduct(null);
-    setFormData({  emertimi: '',pershkrimi: '',shifra: '',njesia: '',Tvsh:'',sasia:'',cmimiShitjes:'' });
+    setFormData({  emertimi: '',pershkrimi: '',shifra: '',njesia: '',sasia:'',cmimiShitjes:'' });
     setIsModalOpen(true);
   };
 
@@ -55,7 +54,6 @@ export const ProductsScreen: React.FC = () => {
       pershkrimi: product.pershkrimi,
       shifra: product.shifra,
       njesia: product.njesia,
-      Tvsh: product.Tvsh,
       sasia: product.sasia,
       cmimiShitjes: product.cmimiShitjes,
     });
@@ -105,7 +103,6 @@ export const ProductsScreen: React.FC = () => {
     { key: 'emertimi', header: 'Emertimi', width: 'auto' },
     { key: 'pershkrimi', header: 'Pershkrimi', width: 'auto' },
     { key: 'njesia', header: 'Njesia', width: 'auto' },
-    { key: 'Tvsh', header: 'TVSH %', width: 'auto' },
     { key: 'sasia', header: 'Sasia', width: 'auto' },
     { key: 'cmimiShitjes', header: 'Cmimi i Shitjes', width: 'auto' },
     
@@ -189,7 +186,7 @@ export const ProductsScreen: React.FC = () => {
     />
   </div>
 
-  {/* Row: Njesia, TVSH, Sasia, Cmimi */}
+  {/* Row: Njesia, Sasia, Cmimi */}
   <div className="grid grid-cols-4 gap-3">
     <div>
       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -200,18 +197,6 @@ export const ProductsScreen: React.FC = () => {
         value={formData.njesia}
         onChange={(e) => setFormData({ ...formData, njesia: e.target.value })}
         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      />
-    </div>
-
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        TVSH %
-      </label>
-      <input
-        type="number"
-        value={formData.Tvsh}
-        onChange={(e) => setFormData({ ...formData, Tvsh: e.target.value })}
-        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </div>
 

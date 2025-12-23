@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('api', {
 
     // Faturat
     getFaturat: () => ipcRenderer.invoke('get-faturat'),
+    getFaturaMeId: (id) => ipcRenderer.invoke('getFaturaMeId',id),
     createFature: (data) => ipcRenderer.invoke('create-fature', data),
     updateFature: (id, data) => ipcRenderer.invoke('update-fature', id, data),
     deleteFature: (id) => ipcRenderer.invoke('delete-fature', id),

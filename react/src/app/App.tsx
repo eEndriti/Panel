@@ -12,20 +12,28 @@ import { SettingsScreen } from './screens/SettingsScreen';
 import { Toaster } from 'react-hot-toast';
 import './components/App.css'
 import { ConfirmDialogProvider } from './components/ConfirmDialogContext';
+import { EditInvoiceScreen } from './screens/EditInvoiceScreen';
 
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeScreen, setActiveScreen] = useState('dashboard');
+  // Add a state to hold the ID of the invoice you want to edit
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
 
-  if (!isLoggedIn) {
-    return <LoginScreen onLogin={() => setIsLoggedIn(true)} />;
-  }
+  const handleEditInvoice = (id: string) => {
+    setEditingInvoiceId(id);
+    setActiveScreen('editInvoice');
+  };
 
   const renderScreen = () => {
     switch (activeScreen) {
       case 'dashboard':
-        return <DashboardScreen />;
+        // Pass the handleEditInvoice function to the Dashboard
+        return <DashboardScreen onEditInvoice={handleEditInvoice} />;
+      case 'editInvoice':
+        // Pass the ID to the Edit Screen
+        return <EditInvoiceScreen invoiceId={editingInvoiceId} onBack={() => setActiveScreen('dashboard')} />;
       case 'clients':
         return <ClientsScreen />;
       case 'products':
@@ -38,6 +46,8 @@ export default function App() {
     
       case 'settings':
         return <SettingsScreen />;
+      case 'editInvoice':
+        return <EditInvoiceScreen />;
       default:
         return <DashboardScreen />;
     }

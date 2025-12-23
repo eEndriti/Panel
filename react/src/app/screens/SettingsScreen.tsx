@@ -198,27 +198,9 @@ export const SettingsScreen: React.FC = () => {
           
         </div>
 
-        {/* Database Management */}
-        <div className="space-y-6">
-          <div className="bg-white rounded-md border border-gray-200 p-5">
-            <h3 className="font-semibold text-gray-900 mb-4">DATABAZA</h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-600 mb-3">
-                  Ruaji te dhenat ne menyre qe mos te humbin.
-                </p>
-                <button className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-                  <Download size={18} />
-                  Ruaji Te Dhenat
-                </button>
-              </div>
-            </div>
-          </div>
+     
 
-         
-        </div>
-
-        <div className="col-span-2 space-y-6">
+        <div className="col-span-1 space-y-6">
           {/* User Information */}
           {loading ? <Loader /> :<div className="bg-white rounded-md border border-gray-200 p-5">
             <h3 className="font-semibold text-gray-900 mb-4">Te Dhenat e Perdoruesit</h3>

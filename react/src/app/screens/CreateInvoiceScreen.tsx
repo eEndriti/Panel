@@ -21,8 +21,7 @@ export const CreateInvoiceScreen: React.FC = () => {
   const [stoku, setStoku] = useState([])
   const [invoiceData, setInvoiceData] = useState({
     rows: [],
-    total: 0,
-    totalTVSH: 0,
+    total: 0
   });
   const [komenti, setKomenti] = useState('')
   const [loadingSaveBtn, setLoadingSaveBtn] = useState(false)
@@ -55,8 +54,8 @@ export const CreateInvoiceScreen: React.FC = () => {
         label: k.emri
       }));
 
-  const handleInvoiceChange = ({ rows, total, totalTVSH }) => {
-    setInvoiceData({ rows, total, totalTVSH });
+  const handleInvoiceChange = ({ rows, total }) => {
+    setInvoiceData({ rows, total });
   };
 
 
@@ -85,19 +84,19 @@ export const CreateInvoiceScreen: React.FC = () => {
       totaliPaguar: totaliPaguarFinal,
       mbetjaPerPagese
     };
-console.log(dataPerFature)
     try {
       setLoadingSaveBtn(true)
-      //const result = await callApi.createFature(dataPerFature)
+      const result = await callApi.createFature(dataPerFature)
        notify('Fatura u Regjistrua me Sukses!','success')
 
     } catch (error) {
        notify('Gabim gjate Regjistrimit!','error')
     }finally{
       setLoadingSaveBtn(false)
+      window.location.reload()
     }
 
-    InvoicePrint(klienti,nrFatures,formattedDate,komenti,invoiceData,kompaniaFetched[0]) // klient data,nr fatures,data fatures,komenti,produktet,totalet
+    InvoicePrint(klienti,nrFatures,formattedDate,komenti,invoiceData,kompaniaFetched[0],totaliPaguarFinal,mbetjaPerPagese) // klient data,nr fatures,data fatures,komenti,produktet,totalet
   }
 
   const formattedDate = invoiceDate.split('-').reverse().join('-');

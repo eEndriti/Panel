@@ -165,7 +165,7 @@ const formatToAlbanianDate = (dateString: string) => {
           {row.lloji !== 'Ndryshim' && <button disabled = {row.lloji  == 'Ndryshim'}
             onClick={(e) => {
               e.stopPropagation();
-              handleDeleteTransaction(row.id);
+              handleDeleteTransaction(row);
             }}
             className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
           >
@@ -184,7 +184,7 @@ const formatToAlbanianDate = (dateString: string) => {
               const result = await callApi.deleteTransaksion(transaksionId)
               notify('Transaksioni u anulua me sukses!','success')
             } catch (error) {
-              notify('Gabim, ju lutem provoni serish !')
+              notify('Gabim, ju lutem provoni serish !','error')
             }finally{
               loadTransactions()
             }
@@ -261,7 +261,7 @@ const formatToAlbanianDate = (dateString: string) => {
         </div>
       </div>
 
-      {loading ? <Loader /> :<DataTable columns={columns} data={filteredTransactions} />}
+      {loading ? <Loader /> :<DataTable columns={columns} data={filteredTransactions.toReversed()} />}
     </div>
   );
 };

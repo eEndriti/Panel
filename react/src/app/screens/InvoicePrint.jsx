@@ -1,14 +1,14 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export const InvoicePrint = (selectedClient,nrFatures,invoiceDate,komenti,invoiceData,kompania) => {
+export const InvoicePrint = (selectedClient,nrFatures,invoiceDate,komenti,invoiceData,kompania,totaliPaguarFinal,mbetjaPerPagese) => {
    // company data,klient data,nr fatures,data fatures,komenti,produktet,totalet
    console.log('data qe e qojm',invoiceData)
-  const fileName = `${invoiceData?.nrFatures}.pdf`;
+  const fileName = `${nrFatures}.pdf`;
   const currentDate = getCurrentDateInAlbanian();
   const currentYear = new Date().getFullYear();
 
-  const handlePrint = async (selectedClient,nrFatures,invoiceDate,komenti,invoiceData,kompania) => {
+  const handlePrint = async (selectedClient,nrFatures,invoiceDate,komenti,invoiceData,kompania,totaliPaguarFinal,mbetjaPerPagese) => {
     console.log('klienti',selectedClient)
     const doc = new jsPDF({
       orientation: "p",
@@ -30,9 +30,9 @@ export const InvoicePrint = (selectedClient,nrFatures,invoiceDate,komenti,invoic
     doc.setFontSize(10);
     doc.text(`${kompania?.adresa}`, margin, 26);
     doc.text(`Tel: ${kompania?.telefoni}`, margin, 31);
-    doc.text(`Nr Biznesit: ${kompania?.nrBiznesit}`, margin, 36);
-    doc.text(`Nr Fiskal: ${kompania?.NrFiskal}`, margin, 41);
-    doc.text(`Nr TVSH: ${kompania?.nrTvsh}`, margin, 46);
+    kompania?.nrBiznesit != null && doc.text(`Nr Biznesit: ${kompania?.nrBiznesit}`, margin, 36);
+    kompania?.NrFiskal != null && doc.text(`Nr Fiskal: ${kompania?.NrFiskal}`, margin, 41);
+    kompania?.nrTvsh != null && doc.text(`Nr TVSH: ${kompania?.nrTvsh}`, margin, 46);
 
     // Client Info Box
     doc.setDrawColor(200);
@@ -44,16 +44,19 @@ export const InvoicePrint = (selectedClient,nrFatures,invoiceDate,komenti,invoic
     doc.setFont("helvetica", "normal");
     doc.text(`${selectedClient?.adresa}`, pageWidth - 92, 25);
     doc.text(`Kontakti: ${selectedClient?.nrTelefonit}`, pageWidth - 92, 30);
-    doc.text(`Nr Biznesit: ${selectedClient?.nrBiznesit}`, pageWidth - 92, 35);
-    doc.text(`Nr Fiskal: ${selectedClient?.nrFiskal}`, pageWidth - 92, 40);
-    doc.text(`Nr TVSH: ${selectedClient?.nrTvsh}`, pageWidth - 92, 45);
+    selectedClient?.nrBiznesit != null &&  doc.text(`Nr Biznesit: ${selectedClient?.nrBiznesit}`, pageWidth - 92, 35);
+    selectedClient?.nrFiskal != null &&  doc.text(`Nr Fiskal: ${selectedClient?.nrFiskal}`, pageWidth - 92, 40);
+    selectedClient?.nrTvsh != null &&  doc.text(`Nr TVSH: ${selectedClient?.nrTvsh}`, pageWidth - 92, 45);
 
     // ----- Invoice Info -----
     doc.line(margin, 51, pageWidth - margin, 51);
     doc.line(margin, 61, pageWidth - margin, 61); // Divider    doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
-    doc.text(`Fatura Nr: ${nrFatures}`, pageWidth - 46, 57);
-    doc.text(`Data e Fatures: ${invoiceDate}`, margin, 57);
+    //16+15+ length i nrFatures
+    const rightEdge = pageWidth - margin;
+
+    doc.text(`Nr i Dokumentit : ${nrFatures}`, rightEdge, 57, { align: 'right' });
+    doc.text(`Data: ${invoiceDate}`, margin, 57);
 
     doc.line(margin, 75, pageWidth - margin, 75); // Divider
 
@@ -67,7 +70,6 @@ export const InvoicePrint = (selectedClient,nrFatures,invoiceDate,komenti,invoic
       { header: "Njesia", dataKey: "njesia" },
       { header: "Cmimi/Cope", dataKey: "cmimiShitjes" },
       { header: "Sasia", dataKey: "sasia" },
-      { header: "TVSH", dataKey: "Tvsh" },
       { header: "Vlera Totale", dataKey: "totaliProduktit" },
     ];
 
@@ -97,18 +99,15 @@ export const InvoicePrint = (selectedClient,nrFatures,invoiceDate,komenti,invoic
             data.cell.text = [`${num.toFixed(2)} €`];
           }
         }
-        if (data.column.dataKey === "Tvsh") {
-          data.cell.text = [`${data.cell.text} %`];
-        }
       }
     });
 
     // ----- Totals Section -----
     const finalY = doc.lastAutoTable.finalY + 10;
     const totals = [
-      `Totali për Pagesë: ${'invoiceData?.totaliPerPagese'}`,
-      `Totali i Pagesës: ${'234234'}`,
-      `Mbetja për Pagesë: ${'23423'}`,
+      `Totali për Pagesë: ${invoiceData?.total?.toFixed(2)} €`,
+      `Totali i Pagesës: ${totaliPaguarFinal?.toFixed(2) || '00.0' } €`,
+      `Mbetja për Pagesë: ${mbetjaPerPagese?.toFixed(2) || '00.0'} €`,
     ];
 
     doc.setFont("helvetica", "bold");
@@ -117,16 +116,18 @@ export const InvoicePrint = (selectedClient,nrFatures,invoiceDate,komenti,invoic
     });
 
     // ----- Comment Section -----
-    const commentY = finalY + totals.length * 7 + 5;
-    doc.setFont("helvetica", "bold");
-    doc.text("Koment:", margin, commentY);
-    doc.setFont("helvetica", "normal");
-    doc.rect(margin, commentY + 2, pageWidth - margin * 2, 20); // Empty box for comment
+    if(komenti && komenti?.length > 1){
+      const commentY = finalY + totals.length * 7 + 5;
+      doc.setFont("helvetica", "bold");
+      doc.text("Koment:", margin, commentY);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${komenti}`, margin, commentY+6);
+    }
 
     // ----- Signatures -----
-    const signatureY = commentY + 30;
+    const signatureY = doc.internal.pageSize.height - 20;
     const sigWidth = 60;
-
+    doc.setFontSize(8)
     doc.line(margin, signatureY, margin + sigWidth, signatureY);
     doc.text("Dorëzoi", margin, signatureY + 4);
 
@@ -136,7 +137,7 @@ export const InvoicePrint = (selectedClient,nrFatures,invoiceDate,komenti,invoic
     // ----- Footer Branding -----
     const footerY = doc.internal.pageSize.height - 10;
     doc.setFontSize(8);
-    const footerText = `${'emriBiznesit'} © 2016-${currentYear} | Tel: ${'currentParametrat.telefoni'} | Adresa: ${'currentParametrat.adresa'}`;
+    const footerText = `${kompania?.emri} © ${currentYear} | Tel: ${kompania?.telefoni} | Adresa: ${kompania?.adresa}`;
     doc.text(footerText, pageWidth / 2, footerY, { align: "center" });
 
     // Save & Open PDF
@@ -146,7 +147,7 @@ export const InvoicePrint = (selectedClient,nrFatures,invoiceDate,komenti,invoic
     await window.api.openFile(filePath);
   };
 
-  handlePrint(selectedClient,nrFatures,invoiceDate,komenti,invoiceData,kompania);
+  handlePrint(selectedClient,nrFatures,invoiceDate,komenti,invoiceData,kompania,totaliPaguarFinal,mbetjaPerPagese);
 };
 
 function getCurrentDateInAlbanian() {

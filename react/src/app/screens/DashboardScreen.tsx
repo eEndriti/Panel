@@ -4,9 +4,18 @@ import { StatCard } from '../components/StatCard';
 import { DataTable } from '../components/DataTable';
 import { callApi } from '../services/callApi';
 import Loader from './Loader';
+import { notify } from '../components/toast';
+import { useConfirm } from '../components/ConfirmDialogContext.jsx';
+
+interface DashboardProps {
+  onEditInvoice: (id: string) => void;
+}
 
 
-const columns = [
+
+export const DashboardScreen: React.FC<DashboardProps> = ({ onEditInvoice }) => {
+  
+  const columns = [
   { key: 'id', header: 'Nr #', width: 'auto' },
   { 
     key: 'data', 
@@ -57,7 +66,7 @@ const columns = [
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleDeleteTransaction(row.id);
+              handleDeleteTransaction(row);
             }}
             className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
           >
@@ -85,24 +94,32 @@ const formatToAlbanianDate = (dateString: string) => {
 
   return `${day} ${month} ${year}`;
 };
+  const handleDeleteTransaction = async (row) => {
 
-  const handleDeleteTransaction = async (transaksionId: number) => {
+    
     const confirmed = await confirm('A jeni i sigurt?')
+    if(confirmed){
+       try {
+        const result = await callApi.deleteFature(row)
+        notify('Fatura u anulua me sukses','success')
+      } catch (error) {
+        notify('Gabim, provoni serish!','error')
+      }
+    }
     
        
   };
 
-  const handleEditTransaction = (product: any) => {
-    alert('Hala su bo')
-   
+  // 2. Update your handler to use the prop
+  const handleEditTransaction = (row: any) => {
+    // Call the function passed from App.tsx
+    onEditInvoice(row.id); 
   };
-
-export const DashboardScreen: React.FC = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [nrPaPaguar, setNrPaPaguar] = useState(0);
   const [faturimetSot, setFaturimetSot] = useState()
-  
+   confirm = useConfirm()
   useEffect(() => {
     loadData()
   }, []);
@@ -110,9 +127,12 @@ export const DashboardScreen: React.FC = () => {
   async function loadData() {
     try {
       const result  = await callApi.getFaturat()
+      const filtered = result.filter(f => !f.isDeleted);
+      let sliced = filtered.slice(-5).reverse()
+      
+      setInvoices(sliced);
       const getNr = await callApi.getNrPaPaguar()
       setNrPaPaguar(getNr[0][''])
-      setInvoices(result)
       
     } catch (error) {
       console.log('error',error)
@@ -208,7 +228,7 @@ const stats = useMemo(() => {
 
       <div className="bg-white rounded-md border border-gray-200 p-5">
         <h3 className="font-semibold text-gray-900 mb-4">Faturat e Fundit</h3>
-        {loading ? <Loader /> :<DataTable columns={columns} data={invoices.toReversed()} />}
+        {loading ? <Loader /> :<DataTable columns={columns} data={invoices} />}
       </div>
     </div>
   );

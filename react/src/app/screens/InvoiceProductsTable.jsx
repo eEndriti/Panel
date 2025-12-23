@@ -6,11 +6,8 @@ export default function InvoiceProductsTable({ products, onChange }) {
   // Calculate totals
   const calculateTotals = (rows) => {
     const total = rows.reduce((acc, r) => acc + (r.totaliProduktit || 0), 0);
-    const totalTVSH = rows.reduce(
-      (acc, r) => acc + ((r.totaliProduktit || 0) * r.Tvsh) / 100,
-      0
-    );
-    return { total, totalTVSH };
+
+    return { total };
   };
 
   // Notify parent whenever rows change
@@ -28,7 +25,6 @@ const addRow = () => {
       selectedProduct: null,
       sasia: 1,
       cmimiShitjes: 0,
-      Tvsh: 0,
       totaliProduktit: 0,
       stock: 0,
       pershkrimi: "",
@@ -51,7 +47,6 @@ const removeRow = (index) => {
     updated[index].emertimi = selected.emertimi;
     updated[index].pershkrimi = selected.pershkrimi;
     updated[index].cmimiShitjes = selected.cmimiShitjes || 0;
-    updated[index].Tvsh = selected.Tvsh;
     updated[index].stock = selected.sasia;
     updated[index].sasia = 1;
     updated[index].njesia = selected.njesia;
@@ -67,7 +62,7 @@ const removeRow = (index) => {
     setRows(updated);
   };
 
-  const { total, totalTVSH } = calculateTotals(rows);
+  const { total } = calculateTotals(rows);
 
   return (
     <div className="bg-white rounded-md border border-gray-200 p-5">
@@ -82,7 +77,6 @@ const removeRow = (index) => {
             <th className="border px-3 py-2">Stoqet</th>
             <th className="border px-3 py-2">Sasia</th>
             <th className="border px-3 py-2">Cmimi Shitjes</th>
-            <th className="border px-3 py-2">TVSH%</th>
             <th className="border px-3 py-2">Totali</th>
             <th className="border px-3 py-2">Veprime</th>
           </tr>
@@ -117,7 +111,6 @@ const removeRow = (index) => {
               <td className="border px-2 py-1"> 
                 <input type="number" min="0" value={row.cmimiShitjes} onChange={(e) => handleFieldChange(index, "cmimiShitjes", e.target.value) } className="w-full px-2 py-1 border rounded text-sm" /> 
               </td> 
-              <td className="border px-2 py-1 text-right">{row.Tvsh}</td> 
               <td className="border px-2 py-1 text-right">{row.totaliProduktit?.toFixed(2)}</td> 
               <td className="border px-2 py-1 text-center"> 
                 <button type="button" onClick={() => removeRow(index)} className="text-red-500 hover:text-red-700 font-semibold" > Fshij </button> 
@@ -139,7 +132,6 @@ const removeRow = (index) => {
         </button>
 
         <div className="text-right font-semibold text-gray-800 space-y-1">
-            <div>TVSH: {totalTVSH?.toFixed(2)} €</div>
             <div>Totali i Produkteve: {total?.toFixed(2)} €</div>
         </div>
       </div>

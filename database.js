@@ -141,12 +141,11 @@ async function createProdukt(data) {
         .input('pershkrimi', sql.NVarChar, data.pershkrimi)
         .input('shifra', sql.NVarChar, data.shifra)
         .input('njesia', sql.NVarChar, data.njesia)
-        .input('Tvsh', sql.Decimal(5,2), data.Tvsh)
         .input('sasia', sql.Decimal(18,2), data.sasia)
         .input('cmimiShitjes', sql.Decimal(18,2), data.cmimiShitjes)
         .query(`INSERT INTO Produktet 
-                (emertimi,pershkrimi,shifra,njesia,Tvsh,sasia,cmimiShitjes)
-                VALUES (@emertimi,@pershkrimi,@shifra,@njesia,@Tvsh,@sasia,@cmimiShitjes)`);
+                (emertimi,pershkrimi,shifra,njesia,sasia,cmimiShitjes)
+                VALUES (@emertimi,@pershkrimi,@shifra,@njesia,@sasia,@cmimiShitjes)`);
 }
 
 async function updateProdukt(id, data) {
@@ -157,12 +156,11 @@ async function updateProdukt(id, data) {
         .input('pershkrimi', sql.NVarChar, data.pershkrimi)
         .input('shifra', sql.NVarChar, data.shifra)
         .input('njesia', sql.NVarChar, data.njesia)
-        .input('Tvsh', sql.Decimal(5,2), data.Tvsh)
         .input('sasia', sql.Decimal(18,2), data.sasia)
         .input('cmimiShitjes', sql.Decimal(18,2), data.cmimiShitjes)
         .query(`UPDATE Produktet SET 
                 emertimi=@emertimi, pershkrimi=@pershkrimi, shifra=@shifra, njesia=@njesia, 
-                Tvsh=@Tvsh, sasia=@sasia, cmimiShitjes=@cmimiShitjes
+                sasia=@sasia, cmimiShitjes=@cmimiShitjes
                 WHERE id=@id`);
 }
 
@@ -178,6 +176,15 @@ async function getFaturat() {
     const pool = await getPool();
     const result = await pool.request().query('SELECT * FROM Faturat');
     return result.recordset;
+}
+
+async function getFaturaMeId(id) {
+    const pool = await getPool();
+    const result = await pool.request()
+            .input('id', sql.Int,id) 
+            .query('SELECT * FROM faturat WHERE id = @id');
+        
+        return result.recordset[0]
 }
 
 async function getNrPaPaguar() {
@@ -283,11 +290,20 @@ async function updateFature(id, data) {
                 WHERE id=@id`);
 }
 
-async function deleteFature(id) {
+async function deleteFature(row) {
+    console.log('row',row)
+
     const pool = await getPool();
     await pool.request()
-        .input('id', sql.Int, id)
-        .query('DELETE FROM Faturat WHERE id=@id');
+        .input('id', sql.Int, row.id)
+        .input('isDeleted', sql.Bit, 1)
+        .query(`UPDATE Faturat SET 
+                isDeleted=@isDeleted
+                WHERE id=@id`);
+
+    await pool.request()
+        .input('referenca', sql.NVarChar, row.nrFatures)
+        .query('DELETE FROM Transaksionet WHERE referenca=@referenca');
 }
 
 // ---- Transaksionet ----
@@ -330,11 +346,29 @@ async function updateTransaksion(id, data) {
                 WHERE id=@id`);
 }
 
-async function deleteTransaksion(id) {
+async function deleteTransaksion(row) {
+    console.log(row)
     const pool = await getPool();
     await pool.request()
-        .input('id', sql.Int, id)
+        .input('id', sql.Int, row.id)
         .query('DELETE FROM Transaksionet WHERE id=@id');
+    
+    if(row.lloji == 'Fature'){
+
+        const result = await pool.request()
+            .input('ref', row.referenca) // This handles the data type and quotes for you
+            .query('SELECT id FROM faturat WHERE nrFatures = @ref');
+        let idFatures =  result.recordset[0].id;
+        console.log('rezalti',result.recordset)
+
+        await pool.request()
+        .input('idFature', sql.Int, idFatures)
+        .query('DELETE FROM FaturaProduktet WHERE idFature=@idFature');
+
+        await pool.request()
+        .input('referenca', sql.NVarChar, row.referenca)
+        .query('DELETE FROM faturat WHERE nrFatures=@referenca');
+    }
 }
 
 // ---- Kompania ----
@@ -409,7 +443,7 @@ module.exports = {
     // Produktet
     getProduktet, createProdukt, updateProdukt, deleteProdukt,
     // Faturat
-    getFaturat, createFature, updateFature, deleteFature,getNrPaPaguar,getInvoiceNr,
+    getFaturat, createFature, updateFature, deleteFature,getNrPaPaguar,getInvoiceNr,getFaturaMeId,
     // Transaksionet
     getTransaksionet, createTransaksion, updateTransaksion, deleteTransaksion,
     // Kompania

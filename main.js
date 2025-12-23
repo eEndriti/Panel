@@ -46,6 +46,7 @@ ipcMain.handle('delete-produkt', async (event, id) => await db.deleteProdukt(id)
 
 // Faturat
 ipcMain.handle('get-faturat', async () => await db.getFaturat());
+ipcMain.handle('getFaturaMeId', async (event,id) => await db.getFaturaMeId(id));
 ipcMain.handle('create-fature', async (event, data) => await db.createFature(data));
 ipcMain.handle('update-fature', async (event, id, data) => await db.updateFature(id, data));
 ipcMain.handle('delete-fature', async (event, id) => await db.deleteFature(id));

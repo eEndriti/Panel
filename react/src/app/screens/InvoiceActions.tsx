@@ -35,7 +35,7 @@ export default function InvoiceActions({invoiceData,onCancel,onRegister,disabled
           <div className="flex justify-between">
             <span className="text-gray-600 font-medium">Totali i Fatures:</span>
             <span className="text-gray-900 font-semibold">
-              {invoiceData.total.toFixed(2)} €
+              {invoiceData?.total?.toFixed(2)} €
             </span>
           </div>
           <div className="flex justify-between items-center">
@@ -52,7 +52,7 @@ export default function InvoiceActions({invoiceData,onCancel,onRegister,disabled
           </div>
           <div className="flex justify-between">
             <span className="text-gray-600 font-medium mr-1">Mbetja per Pagese:</span>
-            <span className="text-gray-900 font-semibold">{mbetjaPerPagese.toFixed(2)} €</span>
+            <span className="text-gray-900 font-semibold">{mbetjaPerPagese?.toFixed(2)} €</span>
           </div>
         </div>
       </div>
