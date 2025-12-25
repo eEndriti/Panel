@@ -2,20 +2,32 @@ const { app, BrowserWindow, ipcMain,shell } = require('electron');
 const path = require('path');
 const db = require('./database.js');
 const fs = require("fs");
+const { loadConfig, saveConfig } = require('./config');
 
 
 function createWindow() {
     const win = new BrowserWindow({
         width: 1200,
         height: 800,
+        title:'Paneli',
+        icon:undefined,
         autoHideMenuBar:true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'), // recommended
             nodeIntegration: false,
             contextIsolation: true
-        }
+        },
+        frame: true, 
     });
-  win.loadURL('http://localhost:5173')
+   if (process.env.NODE_ENV === "development") {
+    win.loadURL("http://localhost:5173"); // Vite dev server
+  } else {
+    win.loadFile(
+        path.join(__dirname, "react", "dist", "index.html")
+    );
+  }
+
+  win.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);
@@ -25,6 +37,8 @@ ipcMain.on('savePDF', (event, { pdfBase64, folderPath, fileName }) => { const fi
 
 ipcMain.on('openFile', (event, filePath) => { shell.openPath(filePath) .then(() => console.log('File opened successfully')) .catch((error) => console.error('Failed to open file:', error)); });
 
+ipcMain.handle('load-db-config', () => loadConfig());
+ipcMain.handle('save-db-config', (event, config) => saveConfig(config));
 
 // Perdoruesit
 ipcMain.handle('get-perdoruesit', async () => await db.getPerdoruesit());
@@ -52,7 +66,7 @@ ipcMain.handle('update-fature', async (event, id, data) => await db.updateFature
 ipcMain.handle('delete-fature', async (event, id) => await db.deleteFature(id));
 ipcMain.handle('getNrPaPaguar', async () => await db.getNrPaPaguar());
 ipcMain.handle('getInvoiceNr', async () => await db.getInvoiceNr());
-
+ipcMain.handle('getFaturaProduktet', async (event,id) => await db.getFaturaProduktet(id));
 // Transaksionet
 ipcMain.handle('get-transaksionet', async () => await db.getTransaksionet());
 ipcMain.handle('create-transaksion', async (event, data) => await db.createTransaksion(data));
@@ -68,3 +82,6 @@ ipcMain.handle('get-parametrat', async () => await db.getParametrat());
 ipcMain.handle('create-parametar', async (event, data) => await db.createParametar(data));
 ipcMain.handle('update-parametar', async (event, id, data) => await db.updateParametar(id, data));
 ipcMain.handle('delete-parametar', async (event, id) => await db.deleteParametar(id));
+
+ipcMain.handle('shtoPagesen', async (event, data) => await db.shtoPagesen(data));
+

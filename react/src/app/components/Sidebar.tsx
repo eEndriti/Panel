@@ -45,7 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeScreen, onNavigate }) =>
       </nav>
       
       <div className="p-3 border-t border-gray-200">
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-gray-700 hover:bg-gray-50 transition-colors" onClick={() => window.location.reload()}>
           <LogOut size={18} />
           <span>Dil</span>
         </button>

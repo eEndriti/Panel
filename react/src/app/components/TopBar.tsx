@@ -4,12 +4,14 @@ import { Plus } from 'lucide-react';
 interface TopBarProps {
   companyName?: string;
   userName?: string;
+  roli?: string;
   onNewInvoice?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({ 
   userName = 'emri userit',
-  onNewInvoice 
+  roli = 'Admin',
+  onNewInvoice ,
 }) => {
 const daysSq = [
   'e Diel',
@@ -51,7 +53,7 @@ const currentDate = `${dayName}, ${day} ${month} ${year}`;
         <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
           <div className="text-right">
             <p className="text-sm font-medium text-gray-900">{userName}</p>
-            <p className="text-xs text-gray-500">roli</p>
+            <p className="text-xs text-gray-500">{roli}</p>
           </div>
           <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
             <span className="text-sm font-semibold text-blue-600">

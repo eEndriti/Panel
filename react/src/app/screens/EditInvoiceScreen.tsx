@@ -28,6 +28,7 @@ export const EditInvoiceScreen: React.FC<EditInvoiceProps> = ({ invoiceId, onBac
   });
   const [komenti, setKomenti] = useState('');
   const [loadingSaveBtn, setLoadingSaveBtn] = useState(false);
+  const [productsLoading, setProductsLoading] = useState(false)
 
   useEffect(() => {
     if (invoiceId) {
@@ -58,11 +59,26 @@ export const EditInvoiceScreen: React.FC<EditInvoiceProps> = ({ invoiceId, onBac
       setInvoiceDate(formattedDate);
     }
       setKomenti(existingInvoice.komenti || '');
+      console.log(existingInvoice)
       
-      setInvoiceData({
-        rows: existingInvoice.invoiceData?.rows || [], 
-        total: existingInvoice.totaliPerPagese
-      });
+     try {
+      setProductsLoading(true)
+         const result = await callApi.getFaturaProduktet(existingInvoice.id);
+
+          setInvoiceData({
+            
+            rows: result,
+            total: result.reduce(
+              (sum, item) => sum + item.cmimiPerCop * item.sasiaShitjes,
+              0
+            )
+          });
+
+     } catch (error) {
+      
+     }finally{
+      setProductsLoading(false)
+     }
 
     } catch (error) {
       console.error('Error loading invoice:', error);
@@ -71,6 +87,7 @@ export const EditInvoiceScreen: React.FC<EditInvoiceProps> = ({ invoiceId, onBac
       setLoading(false);
     }
   }
+      console.log(invoiceData)
 
   const options = klientet.map(k => ({
     value: k.id,
@@ -165,11 +182,12 @@ export const EditInvoiceScreen: React.FC<EditInvoiceProps> = ({ invoiceId, onBac
           </div>
 
           <div className="bg-white rounded-md border border-gray-200 p-5">
-            <InvoiceProductsTable 
+           {productsLoading ? 'Loading' : <InvoiceProductsTable 
+              key={invoiceData.rows.length}   // 👈 FORCE REMOUNT
               products={stoku} 
-              //initialRows={invoiceData.rows} 
+              //initialRows={invoiceData.rows}
               onChange={handleInvoiceChange}
-            />
+            />}
           </div>
         </div>
 
@@ -177,7 +195,7 @@ export const EditInvoiceScreen: React.FC<EditInvoiceProps> = ({ invoiceId, onBac
           invoiceData={invoiceData} 
           onCancel={onBack} 
           onRegister={updateInvoice} 
-          disabledButton={invoiceData.rows.length < 1 || !selectedClient} 
+          disabledButton={invoiceData.rows?.length < 1 || !selectedClient} 
           loadingSaveBtn={loadingSaveBtn}
           //label="Përditëso Faturën"
         />

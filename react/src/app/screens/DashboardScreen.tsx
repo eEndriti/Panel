@@ -6,6 +6,7 @@ import { callApi } from '../services/callApi';
 import Loader from './Loader';
 import { notify } from '../components/toast';
 import { useConfirm } from '../components/ConfirmDialogContext.jsx';
+import PaymentModal from '../components/PaymentModalProps.js';
 
 interface DashboardProps {
   onEditInvoice: (id: string) => void;
@@ -14,6 +15,8 @@ interface DashboardProps {
 
 
 export const DashboardScreen: React.FC<DashboardProps> = ({ onEditInvoice }) => {
+    const [paymentModalData, setPaymentModalData] = useState<any | null>(null);
+  
   
   const columns = [
   { key: 'id', header: 'Nr #', width: 'auto' },
@@ -55,13 +58,16 @@ export const DashboardScreen: React.FC<DashboardProps> = ({ onEditInvoice }) => 
       render: (_: any, row: any) => (
         <div className="flex gap-2">
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEditTransaction(row);
-            }}
-            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-          >
-            <Pencil size={16} />
+              disabled={row.totaliPerPagese === row.totaliPaguar}
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log(row)
+                setPaymentModalData(row);
+                console.log(row)
+              }}
+              className="p-1.5 text-green-600 hover:bg-green-200 rounded transition-colors"
+            >
+              <EuroIcon size={16} />
           </button>
           <button
             onClick={(e) => {
@@ -115,11 +121,12 @@ const formatToAlbanianDate = (dateString: string) => {
     // Call the function passed from App.tsx
     onEditInvoice(row.id); 
   };
+
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [nrPaPaguar, setNrPaPaguar] = useState(0);
   const [faturimetSot, setFaturimetSot] = useState()
-   confirm = useConfirm()
+
   useEffect(() => {
     loadData()
   }, []);
@@ -230,6 +237,16 @@ const stats = useMemo(() => {
         <h3 className="font-semibold text-gray-900 mb-4">Faturat e Fundit</h3>
         {loading ? <Loader /> :<DataTable columns={columns} data={invoices} />}
       </div>
+
+       {paymentModalData && (
+        <PaymentModal
+          isOpen={true}
+          onClose={() => {setPaymentModalData(null);loadData()}}
+          initialTotaliPerPagese={paymentModalData.totaliPerPagese}
+          initialTotaliIPaguar={paymentModalData.totaliPageses}
+          nrFatures = {paymentModalData.nrFatures}
+        />
+      )}
     </div>
   );
 };

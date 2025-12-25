@@ -14,52 +14,65 @@ import './components/App.css'
 import { ConfirmDialogProvider } from './components/ConfirmDialogContext';
 import { EditInvoiceScreen } from './screens/EditInvoiceScreen';
 
-
 export default function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeScreen, setActiveScreen] = useState('dashboard');
-  // Add a state to hold the ID of the invoice you want to edit
+  const [loggedInUser, setLoggedInUser] = useState<{ emri: string; roli: string } | null>(null);
+  const [activeScreen, setActiveScreen] = useState("dashboard");
   const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
 
   const handleEditInvoice = (id: string) => {
     setEditingInvoiceId(id);
-    setActiveScreen('editInvoice');
+    setActiveScreen("editInvoice");
   };
 
   const renderScreen = () => {
+    if (!loggedInUser) {
+      return (
+        <LoginScreen
+          onLoginSuccess={(user) =>
+            setLoggedInUser({ emri: user.emri, roli: user.roli })
+          }
+        />
+      );
+    }
+
     switch (activeScreen) {
-      case 'dashboard':
-        // Pass the handleEditInvoice function to the Dashboard
+      case "dashboard":
         return <DashboardScreen onEditInvoice={handleEditInvoice} />;
-      case 'editInvoice':
-        // Pass the ID to the Edit Screen
-        return <EditInvoiceScreen invoiceId={editingInvoiceId} onBack={() => setActiveScreen('dashboard')} />;
-      case 'clients':
+      case "editInvoice":
+        return (
+          <EditInvoiceScreen
+            invoiceId={editingInvoiceId}
+            onBack={() => setActiveScreen("dashboard")}
+          />
+        );
+      case "clients":
         return <ClientsScreen />;
-      case 'products':
+      case "products":
         return <ProductsScreen />;
-      case 'invoices':
+      case "invoices":
         return <CreateInvoiceScreen />;
-      
-      case 'transactions':
+      case "transactions":
         return <TransactionsScreen />;
-    
-      case 'settings':
+      case "settings":
         return <SettingsScreen />;
-      case 'editInvoice':
-        return <EditInvoiceScreen />;
       default:
-        return <DashboardScreen />;
+        return <DashboardScreen onEditInvoice={handleEditInvoice}/>;
     }
   };
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans">
-      <Sidebar activeScreen={activeScreen} onNavigate={setActiveScreen} />
+      {loggedInUser && (
+        <Sidebar activeScreen={activeScreen} onNavigate={setActiveScreen} user={loggedInUser} />
+      )}
       <div className="flex-1 flex flex-col overflow-hidden">
-        <TopBar 
-          onNewInvoice={() => setActiveScreen('invoices')}
-        />
+        {loggedInUser && (
+          <TopBar
+            onNewInvoice={() => setActiveScreen("invoices")}
+            userName={loggedInUser.emri}
+            roli={loggedInUser.roli}
+          />
+        )}
         <ConfirmDialogProvider>
           <main className="flex-1 overflow-y-auto">
             <Toaster position="top-right" />

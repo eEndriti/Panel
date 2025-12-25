@@ -1,23 +1,16 @@
-const sql = require('mssql');
-const bcrypt = require('bcrypt');
+const sql = require("mssql");
+const bcrypt = require("bcryptjs"); // ✅ FIX
+const { getConfig, saveConfig } = require("./config");
 
-// ====== MSSQL Config ======
-const config = {
-    user: 'user1',
-    password: '12345',
-    server: 'DESKTOP-RJASQGG',      // or your server
-    database: 'paneli',   // name of your DB
-    options: {
-        encrypt: false,       // true if using Azure
-        trustServerCertificate: true
-    }
-};
 
-// ====== Helper to connect ======
+// ====== Helper to connect using dynamic config ======
 async function getPool() {
+    const config = getConfig(); // load config from file
     const pool = await sql.connect(config);
     return pool;
 }
+
+
 
 
 async function hashData(plainTextPassword) {
@@ -434,6 +427,36 @@ async function getInvoiceNr() {
 }
 
 
+async function getFaturaProduktet(id) {
+    const pool = await getPool();
+    const result = await pool.request().query(`SELECT f.id,f.idFature,f.idProdukt,f.sasia as 'sasiaShitjes',f.cmimiPerCop,p.emertimi,p.pershkrimi,p.njesia FROM FaturaProduktet f 
+    join Produktet p on p.id = f.idProdukt
+    WHERE f.idFature  = ${id}`);
+        return result.recordset;
+}
+
+async function shtoPagesen(data) {
+    const pool = await getPool();
+    await pool.request()
+        .input('referenca', sql.NVarChar, data.nrFatures)
+        .input('totaliPerPagese', sql.Decimal(18,2), data.totaliPerPagese)
+        .input('totaliPaguar', sql.Decimal(18,2), data.totaliIPaguar)
+        .input('mbetjaPerPagese', sql.Decimal(18,2), data.mbetjaPerPagese)
+        .query(`UPDATE Transaksionet SET       
+                totaliPerPagese=@totaliPerPagese, totaliPaguar += @totaliPaguar, 
+                mbetjaPerPagese=@mbetjaPerPagese
+                WHERE referenca=@referenca`);
+
+    await pool.request()
+        .input('nrFatures', sql.NVarChar, data.nrFatures)
+        .input('totaliPerPagese', sql.Decimal(18,2), data.totaliPerPagese)
+        .input('totaliPageses', sql.Decimal(18,2), data.totaliIPaguar)
+        .input('mbetja', sql.Decimal(18,2), data.mbetjaPerPagese)
+        .query(`UPDATE Faturat SET 
+                totaliPerPagese=@totaliPerPagese, totaliPageses += @totaliPageses, mbetja=@mbetja
+                WHERE nrFatures=@nrFatures`);
+}
+
 // ===== Export all functions =====
 module.exports = {
     // Perdoruesit
@@ -443,11 +466,13 @@ module.exports = {
     // Produktet
     getProduktet, createProdukt, updateProdukt, deleteProdukt,
     // Faturat
-    getFaturat, createFature, updateFature, deleteFature,getNrPaPaguar,getInvoiceNr,getFaturaMeId,
+    getFaturat, createFature, updateFature, deleteFature,getNrPaPaguar,getInvoiceNr,getFaturaMeId,getFaturaProduktet,
     // Transaksionet
     getTransaksionet, createTransaksion, updateTransaksion, deleteTransaksion,
     // Kompania
     getKompania, updateKompania,
     // Parametrat
-    getParametrat, createParametar, updateParametar, deleteParametar
+    getParametrat, createParametar, updateParametar, deleteParametar,
+
+    shtoPagesen
 };

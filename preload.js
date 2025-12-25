@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('api', {
     deleteFature: (id) => ipcRenderer.invoke('delete-fature', id),
     getNrPaPaguar: () => ipcRenderer.invoke('getNrPaPaguar'),
     getInvoiceNr: () => ipcRenderer.invoke('getInvoiceNr'),
+    getFaturaProduktet: (id) => ipcRenderer.invoke('getFaturaProduktet',id),
     // Transaksionet
     getTransaksionet: () => ipcRenderer.invoke('get-transaksionet'),
     createTransaksion: (data) => ipcRenderer.invoke('create-transaksion', data),
@@ -43,7 +44,9 @@ contextBridge.exposeInMainWorld('api', {
     updateParametar: (id, data) => ipcRenderer.invoke('update-parametar', id, data),
     deleteParametar: (id) => ipcRenderer.invoke('delete-parametar', id),
 
-
+    shtoPagesen: (data) => ipcRenderer.invoke('shtoPagesen', data),
+    loadDBConfig: () => ipcRenderer.invoke('load-db-config'),
+    saveDBConfig: (config) => ipcRenderer.invoke('save-db-config', config),
     savePDF: (data) => ipcRenderer.send('savePDF', data  ),
     openFile: (filePath) => ipcRenderer.send('openFile', filePath),
 });
